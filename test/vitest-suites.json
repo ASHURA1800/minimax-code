@@ -160,6 +160,7 @@
       "packages/config/test/private-config-file.test.ts",
       "packages/config/test/managed-preset-sync.test.ts",
       "packages/config/test/config-update-preservation.test.ts",
+      "packages/config/test/data-dir.test.ts",
       "packages/agent-modules/context-manager/test/compaction-usage.test.ts",
       "packages/local-runtime/test/unit/session-diff-fallback.test.ts",
       "test/history-processing.test.ts",

@@ -88,7 +88,7 @@ describe.skipIf(process.platform !== "win32")("Windows source contract", () => {
         size: artifact.length,
       },
       targets: Object.fromEntries([
-        "darwin-arm64", "darwin-x64", "linux-x64", "windows-x64", "windows-arm64",
+        "darwin-arm64", "darwin-x64", "linux-x64", "linux-arm64", "windows-x64", "windows-arm64",
       ].map((target) => [target, { sha256: "a".repeat(64), size: 1 }])),
     }));
     const signature = Buffer.from(sign(null, manifest, privateKey).toString("base64"));

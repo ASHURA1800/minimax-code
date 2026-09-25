@@ -5,6 +5,7 @@ export type McodeReleaseTarget =
   | 'darwin-arm64'
   | 'darwin-x64'
   | 'linux-x64'
+  | 'linux-arm64'
   | 'windows-x64'
   | 'windows-arm64';
 
@@ -40,6 +41,7 @@ const REQUIRED_V1_TARGETS = [
   'darwin-arm64',
   'darwin-x64',
   'linux-x64',
+  'linux-arm64',
   'windows-x64',
 ] as const satisfies readonly McodeReleaseTarget[];
 const TARGETS = [...REQUIRED_V1_TARGETS, 'windows-arm64'] as const;
@@ -109,6 +111,7 @@ function validateManifest(value: unknown): McodeReleaseManifestV1 {
     'darwin-arm64': readArtifact(value.targets['darwin-arm64'], false, 'targets.darwin-arm64'),
     'darwin-x64': readArtifact(value.targets['darwin-x64'], false, 'targets.darwin-x64'),
     'linux-x64': readArtifact(value.targets['linux-x64'], false, 'targets.linux-x64'),
+    'linux-arm64': readArtifact(value.targets['linux-arm64'], false, 'targets.linux-arm64'),
     'windows-x64': readArtifact(value.targets['windows-x64'], false, 'targets.windows-x64'),
   };
   if (value.targets['windows-arm64'] !== undefined) {

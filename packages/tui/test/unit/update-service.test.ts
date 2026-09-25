@@ -33,6 +33,7 @@ function releaseFixture(version = '1.2.4', artifact = Buffer.from('signed artifa
       'darwin-arm64': { sha256: 'a'.repeat(64), size: 1 },
       'darwin-x64': { sha256: 'b'.repeat(64), size: 1 },
       'linux-x64': { sha256: 'c'.repeat(64), size: 1 },
+      'linux-arm64': { sha256: 'f'.repeat(64), size: 1 },
       'windows-x64': { sha256: 'd'.repeat(64), size: 1 },
       'windows-arm64': { sha256: 'e'.repeat(64), size: 1 },
     },

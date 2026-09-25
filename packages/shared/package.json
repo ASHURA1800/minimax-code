@@ -195,6 +195,10 @@
     "./plugin-mention": {
       "types": "./src/plugin-mention.ts",
       "import": "./dist/plugin-mention.js"
+    },
+    "./windows-file-system": {
+      "types": "./src/windows-file-system.ts",
+      "import": "./dist/windows-file-system.js"
     }
   },
   "types": "./src/index.ts",

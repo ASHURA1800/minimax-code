@@ -183,8 +183,9 @@ describe.skipIf(process.platform === "win32")(
     });
 
     it("copies default-profile credentials into a private config", () => {
-      const defaults = join(root, ".minimax");
-      fs.mkdirSync(defaults);
+      const xdgHome = join(root, ".local", "share");
+      const defaults = join(xdgHome, "minimax");
+      fs.mkdirSync(defaults, { recursive: true });
       fs.writeFileSync(join(defaults, "config.yaml"), document, {
         mode: 0o644,
       });

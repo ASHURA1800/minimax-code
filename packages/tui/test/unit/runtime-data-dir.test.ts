@@ -11,16 +11,30 @@ describe('TUI data directory', () => {
   it.each(['dev', 'test', 'staging', 'prod'] as const)(
     'uses the shared user directory for %s builds',
     (buildEnv) => {
-      expect(resolveDefaultTuiDataDir(buildEnv, undefined, () => null)).toBe(
-        join(homedir(), '.minimax'),
-      );
+      if (process.platform === 'linux') {
+        const xdgHome = process.env.XDG_DATA_HOME?.trim() || join(homedir(), '.local', 'share');
+        expect(resolveDefaultTuiDataDir(buildEnv, undefined, () => null)).toBe(
+          join(xdgHome, 'minimax'),
+        );
+      } else {
+        expect(resolveDefaultTuiDataDir(buildEnv, undefined, () => null)).toBe(
+          join(homedir(), '.minimax'),
+        );
+      }
     },
   );
 
   it('keeps the shared profile suffix', () => {
-    expect(resolveDefaultTuiDataDir('prod', undefined, () => 'smoke')).toBe(
-      join(homedir(), '.minimax-smoke'),
-    );
+    if (process.platform === 'linux') {
+      const xdgHome = process.env.XDG_DATA_HOME?.trim() || join(homedir(), '.local', 'share');
+      expect(resolveDefaultTuiDataDir('prod', undefined, () => 'smoke')).toBe(
+        join(xdgHome, 'minimax-smoke'),
+      );
+    } else {
+      expect(resolveDefaultTuiDataDir('prod', undefined, () => 'smoke')).toBe(
+        join(homedir(), '.minimax-smoke'),
+      );
+    }
   });
 
   it.each([

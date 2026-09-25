@@ -37,8 +37,41 @@ function basenameForProfile(base: string, profile?: string | null): string {
   return profile ? `${base}-${profile}` : base;
 }
 
+/** Basename used under $XDG_DATA_HOME on Linux. Unrelated to NEW_DATA_DIR_BASENAME. */
+const XDG_DATA_DIR_BASENAME = 'minimax';
+
+/**
+ * Resolve the XDG data home directory per the XDG Base Directory
+ * Specification: `$XDG_DATA_HOME` if set to a non-empty value, otherwise
+ * `~/.local/share`. Linux-only concern — callers must gate on
+ * `process.platform === 'linux'` themselves.
+ */
+function resolveXdgDataHome(resolvedHomeDir: string): string {
+  const xdgDataHome = process.env.XDG_DATA_HOME?.trim();
+  return xdgDataHome ? xdgDataHome : path.join(resolvedHomeDir, '.local', 'share');
+}
+
+/**
+ * Primary (non-legacy) data dir path.
+ *
+ * Linux: `$XDG_DATA_HOME/minimax` (default `~/.local/share/minimax`), per the
+ * approved LINUX-001 Unified XDG Data Directory design. macOS/Windows are
+ * unchanged and keep using `~/.minimax`.
+ *
+ * The legacy `~/.minimax` path (see `getLegacyDataDirPath`) is unaffected on
+ * every platform; `resolveDataDirPair` migrates it into this primary path and
+ * leaves a compatibility symlink behind, exactly as it already does for the
+ * pre-existing `.mavis` -> `.minimax` migration.
+ */
 export function getPrimaryDataDirPath(homeDir?: string, profile?: string | null): string {
-  return path.join(resolveHomeDir(homeDir), basenameForProfile(NEW_DATA_DIR_BASENAME, profile));
+  const resolvedHomeDir = resolveHomeDir(homeDir);
+  if (process.platform === 'linux') {
+    return path.join(
+      resolveXdgDataHome(resolvedHomeDir),
+      basenameForProfile(XDG_DATA_DIR_BASENAME, profile),
+    );
+  }
+  return path.join(resolvedHomeDir, basenameForProfile(NEW_DATA_DIR_BASENAME, profile));
 }
 
 export function getLegacyDataDirPath(homeDir?: string, profile?: string | null): string {
@@ -202,12 +235,24 @@ function removeEmptyPrimaryForMigration(newDir: string, logger: DataDirMigration
   }
 }
 
+/**
+ * Ensure `targetPath`'s parent directory exists before a rename/copy into it.
+ * Needed because the primary data dir may now be nested (e.g.
+ * `$XDG_DATA_HOME/minimax` under a not-yet-created `~/.local/share`), unlike
+ * the historical flat `~/.minimax` whose parent (the home dir) always exists.
+ * `fs.renameSync`/`fs.cpSync` do not create missing destination parents.
+ */
+function ensureParentDirExists(targetPath: string): void {
+  fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+}
+
 function migrateLegacyIntoPrimary(
   legacyDir: string,
   newDir: string,
   logger: DataDirMigrationLogger,
 ): boolean {
   try {
+    ensureParentDirExists(newDir);
     fs.renameSync(legacyDir, newDir);
     logger.info(`Migrated legacy data dir ${legacyDir} -> ${newDir}`);
     return true;
@@ -255,6 +300,7 @@ function migrateLegacyLinkTargetIntoPrimary(
 ): boolean {
   try {
     const targetDir = fs.realpathSync(legacyDir);
+    ensureParentDirExists(newDir);
     try {
       fs.renameSync(targetDir, newDir);
     } catch (error) {
